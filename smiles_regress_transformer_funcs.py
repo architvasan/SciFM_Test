@@ -269,7 +269,6 @@ class ModelArchitecture(layers.Layer):
         lr = hyper_params['general']['lr']
         vocab_size = hyper_params['tokenization']['vocab_size']
         maxlen = hyper_params['tokenization']['maxlen']
-        hvd_switch = hyper_params['general']['use_hvd']
 
         arch_params = hyper_params['architecture']
         embed_dim = arch_params['embedding']['embed_dim']
@@ -313,12 +312,7 @@ class ModelArchitecture(layers.Layer):
         self.dense4 = layers.Dense(16, activation=activation_regressor)
         self.dense5 = layers.Dense(1, activation=activation_regressor)
 
-        if hvd_switch:
-            lr = lr * hvd.size()
-            self.opt = Adam(learning_rate=lr) 
-            self.opt = hvd.DistributedOptimizer(self.opt)
-        else:
-            self.opt = Adam(learning_rate=lr)
+        self.opt = Adam(learning_rate=lr)
     
     def call(self):
         x = self.embedding_layer(self.inputs)
